@@ -56,9 +56,9 @@ UI GitHub: [https://github.com/tumobi/nideshop-mini-program](https://github.com/
 
 
 ## Wechat lightweight program screenshot(Updating..)
-
-![MainPage](http://qiniu.harlanc.vip/6.9.2019_5:41:56.png)
-
+<p align="center">
+ <img src="http://qiniu.harlanc.vip/6.9.2019_5:41:56.png">
+</p>
 ## Functionalities
 
 - [x] Write data API services
