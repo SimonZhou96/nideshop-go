@@ -7,92 +7,60 @@ import (
 	"errors"
 	"github.com/go-kit/kit/log"
 	"nideshop-go/models"
+	"strconv"
 )
-
-
-type indexPageJSON struct {
-	data  `json:"data"`
-	Errno int `json:"errno"`
-}
-type goodCount struct {
-	data `json:"data"`
-}
-
-type goodCategory struct {
-	data `json:"data"`
-}
-
 var RepoErr = errors.New("Unable to handle Repo Request")
-type repo struct {
-	db *sql.DB
-	logger log.Logger
-}
-
-type data struct {
-	GoodCount int `json:"goodsCount"`
-
-	NideshopAd []models.NideshopAd `json:"banner"`
-
-	NideshopChannel []models.NideshopChannel `json:"channel"`
-
-	NideshopBrand []models.NideshopBrand `json:"brandList"`
-
-	NideshopTopic []models.NideshopTopic `json:"topicList"`
-
-	NideshopCategory []models.NideshopCategory `json:"categoryList"`
-
-	NideshopHotGoods []models.NideshopGoods `json:"hotGoodsList"`
-
-	NideshopNewGoods []models.NideshopGoods `json:"newGoodsList"`
-
-	BrotherCategory []models.NideshopCategory `json:"brotherCategory"`
-
-	CurrentCategory []models.NideshopCategory `json:"currentCategory"`
-
-	ParentCategory models.NideshopCategory `json:"parentCategory"`
-}
 
 func (r repo)getNideshopCategoryList(rows *sql.Rows, err error) []models.NideshopCategory {
 	if err != nil {
-		r.logger.Log("error with querying category list")
+		r.logger.Log(err)
 	}
 	var data []models.NideshopCategory
 	for rows.Next() {
 		row := models.NideshopCategory{}
 		err := rows.Scan(&row.Id, &row.Name, &row.Keywords, &row.FrontDesc, &row.ParentId, &row.SortOrder, &row.ShowIndex, &row.IsShow, &row.BannerUrl, &row.IconUrl, &row.ImgUrl, &row.WapBannerUrl, &row.Level, &row.Type, &row.FrontName)
 		if err != nil {
-			r.logger.Log("error with single query good category")
+			r.logger.Log(err)
 		}
 		data = append(data, row)
 	}
 	return data
 }
-//func (r repo) QueryNideshopGoodsCategory(id string) (goodCategory, error) {
-//	sql1 := "SELECT * FROM nideshop_category WHERE ( id = $1 )"
-//	//sql2 := "SELECT * FROM `nideshop_category` WHERE ( `id` = 0 ) LIMIT 1" // it is empty set!!
-//	sql3 := "SELECT * FROM `nideshop_category` WHERE ( `parent_id` = 0 )"
-//	sql3 := "SELECT `category_id` FROM `nideshop_goods` LIMIT 10000"
-//	sql4 := "SELECT `parent_id` FROM `nideshop_category` WHERE ( `id` IN (1005007, 1005007, 1005007, 1005007, 1005007, 1005007, 1005007, 1005007, 1005007, 1008001, 1008001, 1008001, 1008001, 1008001, 1008001, 1008001, 1008001, 1008001, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008002, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008008, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008009, 1008015, 1008015, 1008015, 1008015, 1008015, 1008015, 1008015, 1008015, 1008015, 1008016, 1008016, 1008016, 1010002, 1010002, 1010002, 1010002, 1010002, 1010002, 1010002, 1010002, 1010002, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1011004, 1012001, 1012001, 1012001, 1012001, 1012001, 1012001, 1012001, 1012003, 1012003, 1012003, 1012003, 1012003, 1012003, 1012003, 1012003, 1012003, 1015000, 1015000, 1015000, 1015000, 1015000, 1015000, 1015000, 1015000, 1015000, 1015000, 1015000, 1015000, 1015000, 1015000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1017000, 1020003, 1020003, 1020003, 1020003, 1020003, 1020003, 1020003, 1020003, 1020003, 1032000, 1032000, 1032000, 1032000, 1032000, 1032000, 1032000, 1032000, 1036000, 1036000, 1036000, 1036000, 1036000, 1036000, 1036000, 1036000, 1036000, 1036000, 1036000, 1036000) ) LIMIT 10000"
-//	sql5 := "SELECT `id`,`name` FROM `nideshop_category` WHERE ( `id` IN (1005001, 1013001, 1005000, 1005000, 1005000, 1005002, 1005000, 1010000, 1005000, 1008000, 1012000, 1005000, 1005000, 1011000, 1019000, 1005000) ) ORDER BY `sort_order` asc"
-//	sql6 := "SELECT `id` FROM `nideshop_category` WHERE ( `parent_id` = '$1' ) LIMIT 10000"
-//
-//	var goodsCategory goodCategory
-//	var currentCategoryList []models.NideshopCategory // id = $1
-//	var categoryList []models.NideshopCategory // parent_id = 0
-//	var subCategoryList []models.NideshopCategory // parent_id = $2
-//
-//	rows, err := r.db.Query(sql1, id)
-//
-//	currentCategoryList = r.getNideshopCategoryList(rows, err)
-//
-//	rows, err = r.db.Query(sql3, id)
-//
-//	categoryList = r.getNideshopCategoryList(rows, err)
-//
-//	rows, err = r.db.Query(sql6, id)
-//
-//
-//}
+
+func (r repo) QueryNideshopGoodsCategory(id string) ([]models.NideshopCategory, error) {
+	panic("")
+}
+
+func (r repo) QueryNideshopTopicList(page int, size int) (topicList []models.NideshopTopic, errmsg string, errno int, topicCount int) {
+	offset := (page - 1) * size
+	sql1 := "SELECT COUNT(`nideshop_topic`.id) AS think_count FROM `nideshop_topic` LIMIT 1"
+	sql2 := "SELECT `id`,`title`,`price_info`,`scene_pic_url`,`subtitle` FROM `nideshop_topic` LIMIT "+strconv.Itoa(offset)+",10"
+
+	rows, err := r.db.Query(sql1)
+	if err != nil {
+		r.logger.Log(err)
+	}
+	for rows.Next() {
+		err := rows.Scan(&topicCount)
+		if err != nil {
+			r.logger.Log("error with giving the topic count!!")
+		}
+	}
+
+	rows, err = r.db.Query(sql2)
+	if err != nil {
+		r.logger.Log(err)
+	}
+	for rows.Next() {
+		var topic models.NideshopTopic
+		err := rows.Scan(&topic.Id, &topic.Title, &topic.PriceInfo, &topic.ScenePicUrl, &topic.Subtitle)
+		if err != nil {
+			r.logger.Log("error with querying single topic")
+		}
+		topicList = append(topicList, topic)
+	}
+	return topicList, "",0, topicCount
+}
 
 func (r repo) QueryNideshopNewGoods() ([]models.NideshopGoods, error) {
 	sql1 := "SELECT `id`,`name`,`list_pic_url`,`retail_price` FROM `nideshop_goods` WHERE ( `is_new` = 1 ) LIMIT 4;"
@@ -144,7 +112,7 @@ func (r repo) QueryNideshopGoodsCount() (goodCount, error) {
 		if err != nil {
 		}
 		goodsCount = goodCount{data{
-			GoodCount:        row,
+			GoodsCount:        row,
 		}}
 	}
 	return goodsCount, nil
@@ -176,7 +144,6 @@ func (r repo) DBLoadMainPageData(ctx context.Context) (indexPageJSON, error) {
 	cataList, err := r.QueryNideshopCategory()
 	if err != nil {
 	}
-
 	var indexOutput = data {
 		NideshopAd:       banners,
 		NideshopChannel:  channels,
@@ -261,6 +228,42 @@ func (r repo) QueryNideshopCategory() ([]models.NideshopCategory, error) {
 	return data, nil
 }
 
+func (r repo) QueryNideshopCatalogCurrent(parent_id int) (data, error) {
+	sql1 := "SELECT * FROM `nideshop_category` WHERE ( `id` = '"+strconv.Itoa(parent_id)+"' ) LIMIT 1"
+	sql2 := "SELECT * FROM `nideshop_category` WHERE ( `parent_id` = "+strconv.Itoa(parent_id)+" )"
+
+	var currentCategory currentCategoryStruct
+	rows, err := r.db.Query(sql1)
+	if err != nil {
+	}
+	for rows.Next() {
+		row := currentCategoryStruct{}
+		err := rows.Scan(&row.Id, &row.Name, &row.Keywords, &row.FrontDesc, &row.ParentId, &row.SortOrder, &row.ShowIndex, &row.IsShow, &row.BannerUrl, &row.IconUrl, &row.ImgUrl, &row.WapBannerUrl, &row.Level, &row.Type, &row.FrontName)
+		if err != nil {
+			return data{}, err
+		}
+		currentCategory = row
+	}
+
+	var parentCategory []models.NideshopCategory
+	rows, err = r.db.Query(sql2)
+	if err != nil {
+	}
+	for rows.Next() {
+		row := models.NideshopCategory{}
+		err := rows.Scan(&row.Id, &row.Name, &row.Keywords, &row.FrontDesc, &row.ParentId, &row.SortOrder, &row.ShowIndex, &row.IsShow, &row.BannerUrl, &row.IconUrl, &row.ImgUrl, &row.WapBannerUrl, &row.Level, &row.Type, &row.FrontName)
+		if err != nil {
+			return data{}, err
+		}
+		parentCategory = append(parentCategory, row)
+	}
+
+	currentCategory.SubCategoryList = parentCategory
+	return data{
+		CurrentCategory:  currentCategory,
+	}, nil
+}
+
 /**
 	AdPositionId int    `json:"ad_position_id"`
 	Content      string `json:"content"`
@@ -293,6 +296,66 @@ func (r repo) QueryNideShopAd() ([]models.NideshopAd, error) {
 	return data, nil
 }
 
+func (r repo) QueryNideshopCatalogIndex() (data, error) {
+	sql1 := "SELECT * FROM `nideshop_category` WHERE ( `parent_id` = 0 ) LIMIT 10"
+	sql2 := "SELECT * FROM `nideshop_category` WHERE ( `parent_id` = 1005000 )"
+	sql3 := "SELECT * FROM `nideshop_category` WHERE ( `id` = 1005000 )"
+
+	rows, err := r.db.Query(sql3)
+	if err != nil {
+		r.logger.Log(err)
+		return data{}, err
+	}
+	var currentCategory currentCategoryStruct
+	for rows.Next() {
+		row := currentCategoryStruct{}
+		err := rows.Scan(&row.Id, &row.Name, &row.Keywords, &row.FrontDesc, &row.ParentId, &row.SortOrder, &row.ShowIndex, &row.IsShow, &row.BannerUrl, &row.IconUrl, &row.ImgUrl, &row.WapBannerUrl, &row.Level, &row.Type, &row.FrontName)
+		if err != nil {
+			r.logger.Log(err)
+			return data{}, err
+		}
+		currentCategory = row
+	}
+
+	rows, err = r.db.Query(sql1)
+	if err != nil {
+		r.logger.Log(err)
+		return data{}, err
+	}
+	var categoryList []models.NideshopCategory
+	for rows.Next() {
+		row := models.NideshopCategory{}
+		err := rows.Scan(&row.Id, &row.Name, &row.Keywords, &row.FrontDesc, &row.ParentId, &row.SortOrder, &row.ShowIndex, &row.IsShow, &row.BannerUrl, &row.IconUrl, &row.ImgUrl, &row.WapBannerUrl, &row.Level, &row.Type, &row.FrontName)
+		if err != nil {
+			r.logger.Log(err)
+			return data{}, err
+		}
+		categoryList = append(categoryList, row)
+	}
+	currentCategory.SubCategoryList = categoryList
+
+	var currentCategoryList []models.NideshopCategory
+	rows, err = r.db.Query(sql2)
+	if err != nil {
+		r.logger.Log(err)
+		return data{}, err
+	}
+	for rows.Next() {
+		row := models.NideshopCategory{}
+		err := rows.Scan(&row.Id, &row.Name, &row.Keywords, &row.FrontDesc, &row.ParentId, &row.SortOrder, &row.ShowIndex, &row.IsShow, &row.BannerUrl, &row.IconUrl, &row.ImgUrl, &row.WapBannerUrl, &row.Level, &row.Type, &row.FrontName)
+		if err != nil {
+			r.logger.Log(err)
+			return data{}, err
+		}
+		currentCategoryList = append(currentCategoryList, row)
+	}
+
+	var data = data{
+		NideshopCategory: categoryList,
+		CurrentCategory:  currentCategory,
+	}
+	return data, nil
+}
 
 func NewRepo(db *sql.DB, logger log.Logger) Repository {
 	return &repo{

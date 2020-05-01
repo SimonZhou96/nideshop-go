@@ -25,3 +25,27 @@ type goodCategoryResponse struct {
 	currentCategory models.NideshopCategory
 	parentCategory []models.NideshopCategory
 }
+
+type topicListRequest struct {
+	page int
+	size int
+}
+
+type topicListResponse struct {
+	topicList topicList
+}
+
+type catalogIndexRequest struct {
+}
+
+type catalogIndexResponse struct {
+	catelogIndex catalogIndex
+}
+
+type catalogCurrentRequest struct {
+	parent_id int
+}
+
+type catalogCurrentResponse struct {
+	catalogCurrent catalogCurrent
+}

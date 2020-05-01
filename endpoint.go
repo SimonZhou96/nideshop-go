@@ -3,14 +3,9 @@ package nideshop
 import (
 	"context"
 	"github.com/go-kit/kit/endpoint"
-	"log"
+	_ "github.com/go-kit/kit/log"
+	log2 "log"
 )
-
-// Endpoints are exposed
-type Endpoints struct {
-	GetEndPoint endpoint.Endpoint
-	LoadMainPageEndpoint endpoint.Endpoint
-}
 
 /**
 Make...() will receive the service as argument, then use a type assertion to "force"
@@ -24,7 +19,7 @@ func MakeLoadMainPageDataEndpoint(srv Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		itf, err := srv.LoadMainPageData(ctx)
 		if err != nil {
-			log.Fatal("error at load main page end point")
+			log2.Fatal(err)
 		}
 		return loadMainPageDataResponse{indexMainPageData:itf}, nil
 	}
@@ -35,28 +30,44 @@ func MakeGoodCountEndpoint(srv Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		itf, err := srv.LoadGoodCount(ctx)
 		if err != nil {
-			log.Fatal("error at good count end point")
+			log2.Fatal(err)
 		}
 		return goodCountResponse{goodCount:itf}, nil
 	}
 }
 
-func MakeGoodCategoryEndpoint(srv Service) endpoint.Endpoint {
+
+func MakeTopicListEndpoint(srv Service) endpoint.Endpoint {
 
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 
+		topicsList, err := srv.LoadTopicLists(request.(topicListRequest).page,request.(topicListRequest).size)
+		if err != nil {
+			log2.Fatal(err)
+		}
+		return topicListResponse{topicList:topicsList}, nil
 	}
 }
-//// Load main page endpoint mapping
-//func (e Endpoints) LoadMainPage(ctx context.Context) error {
-//	req := LoadMainPageDataRequest{}
-//	resp, err := e.LoadMainPageEndpoint(ctx, req)
-//	if err != nil {
-//		return err
-//	}
-//	loadMainPageResp := resp.(LoadMainPageDataResponse)
-//	if loadMainPageResp.status == "okk" {
-//		return nil
-//	}
-//	return errors.New(loadMainPageResp.status)
-//}
+
+func MakeCatalogIndexEndpoint(srv Service) endpoint.Endpoint {
+	
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+
+		catelogIndexStruct, err := srv.LoadCatalogIndex(ctx)
+		if err != nil {
+			log2.Fatal(err)
+		}
+		return catalogIndexResponse{catelogIndex:catelogIndexStruct},nil
+	}
+}
+func MakeCatalogCurrentEndpoint(srv Service) endpoint.Endpoint {
+
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		parent_id := request.(catalogCurrentRequest).parent_id
+		catalogCurrentStruct, err := srv.LoadCatalogCurrent(ctx, parent_id)
+		if err != nil {
+			log2.Fatal(err)
+		}
+		return catalogCurrentResponse{catalogCurrentStruct}, nil
+	}
+}

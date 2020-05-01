@@ -7,6 +7,7 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 /**
 Our service will be exposed using HTTP.
@@ -41,7 +42,26 @@ func MakeHTTPHandler(s Service) http.Handler {
 		EncodeGoodCountResponse,
 	))
 
+	topicListEndpoint := MakeTopicListEndpoint(s)
+	r.Methods("GET").Path("/api/topic/list").Handler(httptransport.NewServer(
+		topicListEndpoint,
+		DecodeTopicListRequest,
+		EncodeTopicListResponse,
+	))
 
+	catalogIndexEndpoint := MakeCatalogIndexEndpoint(s)
+	r.Methods("GET").Path("/api/catalog/index").Handler(httptransport.NewServer(
+		catalogIndexEndpoint,
+		DecodeCatalogIndexRequest,
+		EncodeCatalogIndexResponse,
+	))
+
+	catalogCurrentEndpoint := MakeCatalogCurrentEndpoint(s)
+	r.Methods("GET").Path("/api/catalog/current").Handler(httptransport.NewServer(
+		catalogCurrentEndpoint,
+		DecodeCatalogCurrentRequest,
+		EncodeCatalogCurrentResponse,
+	))
 	return r
 }
 func DecodeLoadMainPageDataRequest(_ context.Context, r*http.Request) (interface{}, error) {
@@ -65,4 +85,41 @@ func EncodeGoodCountResponse(_ context.Context, w http.ResponseWriter, response 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	newRes := response.(goodCountResponse)
 	return json.NewEncoder(w).Encode(newRes.goodCount)
+}
+
+func DecodeTopicListRequest(_ context.Context, r*http.Request) (interface{}, error) {
+	var req topicListRequest
+	req.page, _ = strconv.Atoi(r.URL.Query()["page"][0])
+	req.size, _ = strconv.Atoi(r.URL.Query()["size"][0])
+
+	return req, nil
+}
+
+func EncodeTopicListResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	newRes := response.(topicListResponse)
+	return json.NewEncoder(w).Encode(newRes.topicList)
+}
+
+func DecodeCatalogIndexRequest(_ context.Context, r*http.Request)  (interface{}, error) {
+	var req catalogIndexRequest
+	return req, nil
+}
+
+func EncodeCatalogIndexResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	newRes := response.(catalogIndexResponse)
+	return json.NewEncoder(w).Encode(newRes.catelogIndex)
+}
+
+func DecodeCatalogCurrentRequest(_ context.Context, r*http.Request)  (interface{}, error) {
+	var req catalogCurrentRequest
+	req.parent_id, _ = strconv.Atoi(r.URL.Query()["id"][0])
+
+	return req, nil
+}
+func EncodeCatalogCurrentResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	newRes := response.(catalogCurrentResponse)
+	return json.NewEncoder(w).Encode(newRes.catalogCurrent)
 }
